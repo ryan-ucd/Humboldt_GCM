@@ -1,9 +1,8 @@
-# load(file = "./data/processed/CNA_near_mid_far_MSY.RData")
 
 # Libraries
 library(maptools)
 library(leaflet)
-library(rgdal)
+#library(sp)
 library(markdown)
 library(knitr)
 #library(stringr)
@@ -60,7 +59,6 @@ varsNA2<-sub(pattern = "_mean",replacement = "",varsNA1)
 
 library(plyr)
 
-# cmip5 <- read.csv("C:/Users/ejholmes/Desktop/Test_apps/Humbolt_Bay/Data/Allmods_dbasin_vars.csv", header = T)
 cmip5 <- read.csv("Allmods_dbasin_vars.csv", header = T, stringsAsFactors = F)
 
 cmip5$cuts <- cut(cmip5$yr,breaks = c(1950,2020,2050,2080,2099), include.lowest=TRUE, labels= c("1950-2020", "2021-2050", "2051-2080", ">2081"))
@@ -84,8 +82,7 @@ cmip5ply <- ddply(cmip5, .(cuts, model), summarize,
 cmip5ply$model<-sub(pattern = "_1_rcp85", "", cmip5ply$model)
 #cmip5ply$model<-str_to_upper(cmip5ply$model)
 
-##
-
+# set up the lookups
 varLookup <- data.frame(
   "variable.short" = c("MAT", "MWMT", "MAP", "MWMP", "MDMP", "TMAX_WT", "PPT_WT",
                        "PPT_SM", "AHM", "SHM"), 
@@ -100,10 +97,3 @@ varLookup$variable.mean <- paste(varLookup$variable.short, "mean", sep = "")
 varLookup$variable.se <- paste(varLookup$variable.short, "se", sep = "")
 
 
-# RUNNING SHINY -----------------------------------------------------------
-
-# running shiny app: Update package first
-# devtools::install_github('rstudio/shinyapps')
-# library(shinyapps)
-# shinyapps::deployApp('path/to/your/app')
-# shinyapps::deployApp("./shiny/Humboldt_ClimateNA")

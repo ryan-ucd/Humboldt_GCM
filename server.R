@@ -1,6 +1,8 @@
 library(shiny)
+library(dplyr)
 library(ggplot2)
 library(leaflet)
+library(sf)
 #library(gridExtra)
 
 
@@ -107,25 +109,19 @@ shinyServer(function(input,output) {
     
         # make maps of Humboldt Bay
       
-        # projections
-        nad83z10<-"+proj=utm +zone=10 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
-        
         # read in some shapefiles and make spatial
+        polygon <- st_read("./shps/ExtentPoly.shp") %>% st_transform(crs = "+proj=longlat +datum=WGS84") %>% as("Spatial")
+        #st_crs(polygon)
         
-        polygon <- readShapePoly("shps/ExtentPoly.shp", proj4string=CRS(nad83z10))
-        polygon <- spTransform(polygon, CRS("+proj=longlat +datum=NAD83"))
+        ptsCNA_clipped <- st_read("./shps/ClimateNA_humboldt_extent_only.shp") %>% st_transform("+proj=longlat +datum=WGS84") %>% as("Spatial")
+        #st_crs(ptsCNA_clipped)
         
-        ptsCNA_clipped <- readShapePoints("shps/ClimateNA_humboldt_extent_only.shp", proj4string=CRS(nad83z10))
-        ptsCNA_clipped <- spTransform(ptsCNA_clipped, CRS("+proj=longlat +datum=NAD83"))
-        
-        ptsCNA_bbox <- readShapePoints("shps/ClimateNA_master_pts_humboldt.shp", proj4string=CRS(nad83z10))
-        ptsCNA_bbox <- spTransform(ptsCNA_bbox, CRS("+proj=longlat +datum=NAD83"))
+        ptsCNA_bbox <- st_read("shps/ClimateNA_master_pts_humboldt.shp") %>% 
+          st_transform("+proj=longlat +datum=WGS84") %>% as("Spatial")
         
         
         leaflet() %>% addTiles() %>% 
           setView(-124.0625, 40.6875, 10) %>%
-          #addMarkers(lat = allmods[c(1:4),1], lng = allmods[c(1:4),2]) %>%
-          #addPolygons(data=polygon2, weight=2, color = "red") %>% 
           addPolygons(data=polygon, weight=2, color = "black") %>%
           addCircles(data=ptsCNA_clipped, weight=2, color= "blue") %>% 
           addCircles(data=ptsCNA_bbox, weight=1, color= "yellow")
